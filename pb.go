@@ -292,7 +292,15 @@ func (pb *ProgressBar) write(current int64) {
 		current := Format(current).To(pb.Units).Width(pb.UnitsWidth)
 		if pb.Total > 0 {
 			total := Format(pb.Total).To(pb.Units).Width(pb.UnitsWidth)
-			countersBox = fmt.Sprintf(" %s / %s ", current, total)
+			fcurrent := current.String()
+			if pb.current > pb.Total {
+				pb.Total = pb.current
+
+			}
+			if len(total.String()) != len(current.String()) {
+				fcurrent = fmt.Sprintf("%s%s", strings.Repeat(" ", len(total.String())-len(current.String())), current)
+			}
+			countersBox = fmt.Sprintf(" %s / %s ", fcurrent, total)
 		} else {
 			countersBox = fmt.Sprintf(" %s / ? ", current)
 		}
@@ -387,7 +395,7 @@ func (pb *ProgressBar) write(current int64) {
 	}
 
 	// check len
-	out = pb.prefix + countersBox + barBox + percentBox + speedBox + timeLeftBox + pb.postfix
+	out = countersBox + pb.prefix + barBox + percentBox + speedBox + timeLeftBox + pb.postfix
 	if cl := escapeAwareRuneCountInString(out); cl < width {
 		end = strings.Repeat(" ", width-cl)
 	}
